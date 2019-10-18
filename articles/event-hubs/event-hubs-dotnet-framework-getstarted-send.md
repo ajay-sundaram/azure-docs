@@ -41,11 +41,11 @@ In Visual Studio, create a new Visual C# Desktop App project using the **Console
 ### Add the Event Hubs NuGet package
 
 1. In Solution Explorer, right-click the **Sender** project, and then click **Manage NuGet Packages for Solution**. 
-2. Click the **Browse** tab, then search for `WindowsAzure.ServiceBus`. Click **Install**, and accept the terms of use. 
+2. Click the **Browse** tab, then search for `Microsoft.Azure.EventHubs`. Click **Install**, and accept the terms of use. 
    
     ![Install Service Bus NuGet package](./media/event-hubs-dotnet-framework-getstarted-send/create-sender-csharp2.png)
    
-    Visual Studio downloads, installs, and adds a reference to the [Azure Service Bus library NuGet package](https://www.nuget.org/packages/WindowsAzure.ServiceBus).
+    Visual Studio downloads, installs, and adds a reference to the [Azure Service Bus library NuGet package](https://www.nuget.org/packages/Microsoft.Azure.EventHubs).
 
 ### Write code to send messages to the event hub
 
@@ -53,27 +53,26 @@ In Visual Studio, create a new Visual C# Desktop App project using the **Console
    
     ```csharp
     using System.Threading;
-    using Microsoft.ServiceBus.Messaging;
+    using Microsoft.Azure.EventHubs;
     ```
-2. Add the following fields to the **Program** class, substituting the placeholder values with the name of the event hub you created in the previous section, and the namespace-level connection string you saved previously. You can copy connection string for your event hub from **Connection string-primary** key under **RootManageSharedAccessKey** on the Event Hub page in the Azure portal. For detailed steps, see [Get connection string](event-hubs-get-connection-string.md#get-connection-string-from-the-portal).
+2. Add the following fields to the **Program** class, substituting the placeholder values with the name of the event hub you created in the previous section, and the namespace-level connection string you saved previously. You should create and copy connection string for your event hub from **Shared access policies** under the Event Hub page in the Azure portal. For detailed steps, see [Get connection string](event-hubs-get-connection-string.md#get-connection-string-from-the-portal).
    
     ```csharp
-    static string eventHubName = "Your Event Hub name";
-    static string connectionString = "namespace connection string";
+   static string connectionString = "namespace connection string";
     ```
 3. Add the following method to the **Program** class:
    
       ```csharp
       static void SendingRandomMessages()
       {
-          var eventHubClient = EventHubClient.CreateFromConnectionString(connectionString, eventHubName);
+          var eventHubClient = EventHubClient.CreateFromConnectionString(connectionString);
           while (true)
           {
               try
               {
                   var message = Guid.NewGuid().ToString();
                   Console.WriteLine("{0} > Sending message: {1}", DateTime.Now, message);
-                  eventHubClient.Send(new EventData(Encoding.UTF8.GetBytes(message)));
+                  eventHubClient.SendAsync(new EventData(Encoding.UTF8.GetBytes(message))).GetAwaiter().GetResult();
               }
               catch (Exception exception)
               {
